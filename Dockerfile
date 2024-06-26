@@ -3,11 +3,14 @@
 FROM adoptopenjdk/openjdk17:alpine-jre
 
 # Simply the artifact path
-ARG artifact=target/spring-boot-web.jar
+#ARG artifact=target/spring-boot-web.jar
 
-WORKDIR /opt/app
+#WORKDIR /opt/app
 
-COPY ${artifact} app.jar
+#COPY ${artifact} app.jar
+
+EXPOSE 8080
+ADD target/devoops-springboot-integration.jar devoops-springboot-integration.jar
 
 # This should not be changed
-ENTRYPOINT ["java","-jar","app.jar"]
+ENTRYPOINT ["java","-jar","/devoops-springboot-integration.jar"]
