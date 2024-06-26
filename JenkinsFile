@@ -89,7 +89,7 @@ pipeline {
         stage('Push image to Hub'){
             steps{
                 script{
-                   withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
+                   withCredentials([string(credentialsId: 'docker-cred', variable: 'dockerhubpwd')]) {
                    sh 'docker login -u sunil-nj -p ${dockerhubpwd}'
 
 }
@@ -106,3 +106,51 @@ pipeline {
         }
     }
 }
+// ---------------------
+
+pipeline {
+
+  environment {
+    dockerimagename = "sunil/devops-springboot-integration"
+    dockerImage = ""
+  }
+  agent any
+
+    stages {
+
+      stage('Checkout Source') {
+        steps {
+          git 'https://github.com/sunil-nj/cicd-demo-springboot.git'
+        }
+      }
+      stage('Build image') {
+            steps{
+              script {
+                dockerImage = docker.build dockerimagename
+              }
+            }
+          }
+
+          stage('Pushing Image') {
+            environment {
+                     registryCredential = 'docker-cred'
+                 }
+            steps{
+              script {
+                docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+                  dockerImage.push("latest")
+                }
+              }
+            }
+          }
+          stage('Deploying App to Kubernetes') {
+                steps {
+                  script {
+                    kubernetesDeploy(configs: "deployment.yml", kubeconfigId: "kubernetes")
+                  }
+                }
+              }
+
+            }
+
+          }
